@@ -1,9 +1,10 @@
 # -*- coding: utf-8 -*-
 import numpy as np
+from utils.activation import sigmoid
 
 
-class LinearRegression:
-    def __init__(self, iter_num=100, lamb=1.0, learning_rate=0.1, ):
+class LogisticRegression:
+    def __init__(self, iter_num=100, lamb=1.0, learning_rate=0.1):
         self.iter_num = iter_num
         self.lamb = lamb
         self.learning_rate = learning_rate
@@ -21,10 +22,12 @@ class LinearRegression:
         n, p = x.shape
         self.w = np.random.rand(p, 1) / np.sqrt(n)
         for index in range(self.iter_num):
-            diff = np.dot(x, self.w) - y
-            grad = np.dot(x.T, diff) / n + self.lamb * self.w
+            diff = sigmoid(np.dot(x, self.w)) - y
+            grad = np.dot(x.transpose(), diff) / n + self.lamb * self.w
             self.w -= self.learning_rate * grad
-            self.loss = (np.dot(diff.T, diff) / n + self.lamb * np.dot(self.w.T, self.w)) / 2
+            y_hat = sigmoid(np.dot(x, self.w))
+            cross_entropy = -(np.dot(y.transpose(), np.log(y_hat)) + np.dot(1 - y.transpose(), np.log(1 - y_hat)))
+            self.loss = (cross_entropy / n + self.lamb * np.dot(self.w.T, self.w)) / 2
             if index % 100 == 0:
                 print("loss: %f" % self.loss)
 
@@ -39,6 +42,6 @@ class LinearRegression:
     def predict(self, x):
         x = np.array(x)
         assert x.shape[1] == self.w.shape[0]
-        return np.dot(x, self.w)
+        return sigmoid(np.dot(x, self.w))
 
 
